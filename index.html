@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Saxo currency charts</title>
+    <!-- Compiled and minified CSS Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Rate trends charts for any currency pair - powered by <a href="https://www.developer.saxo/">Saxo's OpenAPI</a></h1>
+            <hr>
+            <div class="input-group">
+                <input type="text" class="form-control search-text"
+                       placeholder="Search for currency pair, using 3-digit currency codes (USDDKK)...">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default search-button">Build the chart</button>
+                </div>
+            </div>
+            <br>
+            <div id="container"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Including jQuery from the Google CDN -->
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- Pointing to an external JavaScript file with Saxo's data fetching script -->
+<script type="text/javascript" src="main.js"></script>
+<!-- Pointing to a Highchart CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highstock/6.0.3/highstock-all.js"></script>
+</body>
+</html>
