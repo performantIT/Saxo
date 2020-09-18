@@ -1,0 +1,402 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "TicTacToe API",
+    "description" : "The TicTacToe API is a basic suite of tools bringing TicTacToe gaming functionality to your webpages and apps. In its current version, the TicTacToe API only supports two player matchmaking scenarios - (1) where opponent for your user is assigned authomatically and (2) where your user choses a single player to challenge.",
+    "contact" : {
+      "email" : "kseniia.kal@gmail.com"
+    },
+    "version" : "0.0.2"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/performantIT/TicTacToeAPI_Kseniia/0.0.2",
+    "description" : "SwaggerHub API Auto Mocking"
+  } ],
+  "tags" : [ {
+    "name" : "Use case scenario",
+    "description" : "Before we proceed with a technical structure and description of operations available in the TicTacToe API, let's explore a specific use case. Say you wish to add a TicTacToe game to your website. With our API, you publish a list of players known to our server and available for a game (GET/players). You provide your user with an interface to choose their own username (POST/players), pick an opponent to challenge and request a game from this opponent (POST/games). You query the API until the created game is accepted (GET/games/{gameId}) and inform your user once it is. The game starts successfully, you build a 3×3 Tic-tac-toe grid board. Your user plays X and it is their turn to make a move (POST/games/{gameId}/moves). Players take turns marking the grid until the game is won or drawn (GET/games/{gameId}). Well played!"
+  }, {
+    "name" : "Authentication",
+    "description" : "No authentication or authorization is required to access this API, and all resources are fully open and available. We currently do not limit a number of requests per IP either."
+  }, {
+    "name" : "Resources: Players",
+    "description" : "Many players are using our game engine, and new ones are always welcome. The following API endpoints can be used to get player information for several players and add/create new players."
+  }, {
+    "name" : "Resources: Games",
+    "description" : "When the time is right for a challenge, the following API endpoins can be used to create a TicTacToe game, request it from any player, check status of a requested game as well as make moves and see those of an opponent."
+  }, {
+    "name" : "Error descriptions",
+    "description" : "The most common errors for the TicTacToe API are descriped for each endpoint under responses section."
+  }, {
+    "name" : "Change log",
+    "description" : "Updates and information on how these affect API consumers are posted here."
+  } ],
+  "paths" : {
+    "/players" : {
+      "get" : {
+        "tags" : [ "Resources: Players" ],
+        "summary" : "This endpoint retrieves information about all players. It returns a collection of player objects. Each object has playerId, username and availability attributes. It is possible to query by availability to filter out players that are currently in a game or otherwise not available.",
+        "operationId" : "findPlayers",
+        "parameters" : [ {
+          "name" : "availability",
+          "in" : "query",
+          "description" : "Pass an optional player availability parameter. For example, /players?availability=true",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/Player/properties/availability"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "player search results retrieved successfully, if applicable - matching availability criteria",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Player"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad input parameter",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Resources: Players" ],
+        "summary" : "This endpoint adds a new player to the system. It requests a username object and returns a location header along with a representation/object of the player just created - with playerId, username and availability.",
+        "operationId" : "addPlayer",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlayerBody"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "player created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Player"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "invalid input",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "player with this username already exists",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games" : {
+      "post" : {
+        "tags" : [ "Resources: Games" ],
+        "summary" : "This endpoint creates a new game. It returns a location header along with a representation/object of the game just created. The response includes information about the gameId, players (playerX and playerO) and game status (notStarted by default). It is possible to request a game from a chosen player by passing an object with an identifier of this player in a request body. If such identifier is not passed, the opponent is chosen authomatically.",
+        "operationId" : "createGame",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GameBody"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "game created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Game"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "invalid input",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{gameId}" : {
+      "get" : {
+        "tags" : [ "Resources: Games" ],
+        "summary" : "This endpoint retrieves information about a single game by the unique game identifier. It requires a gameId in a path and returns a single game object with full data about it - such as status and succession of moves.",
+        "operationId" : "getGameById",
+        "parameters" : [ {
+          "name" : "gameId",
+          "in" : "path",
+          "description" : "Insert an id of a game into the endpoint path. For example, /games/12",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/Game/properties/gameId"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "game found successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Game"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "invalid id",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{gameId}/moves" : {
+      "post" : {
+        "tags" : [ "Resources: Games" ],
+        "summary" : "This endpoint creates a move in a game with the unique identifier. It requires a gameId in a path and a representation of a move that consists of coordinates (xCoordinate and yCoordinate) in the request body. Returns a representation/object of the game, where the move was created.",
+        "operationId" : "createMove",
+        "parameters" : [ {
+          "name" : "gameId",
+          "in" : "path",
+          "description" : "Insert an id of a game into the endpoint path. For example, /games/12/moves",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/Game/properties/gameId"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveBody"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "move made successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Move"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "invalid move",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "move already made",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Player" : {
+        "required" : [ "availability", "playerId", "username" ],
+        "type" : "object",
+        "properties" : {
+          "playerId" : {
+            "type" : "integer",
+            "example" : 123
+          },
+          "username" : {
+            "type" : "string",
+            "example" : "player"
+          },
+          "availability" : {
+            "type" : "boolean"
+          }
+        },
+        "example" : {
+          "availability" : true,
+          "playerId" : 123,
+          "username" : "player"
+        }
+      },
+      "Game" : {
+        "required" : [ "gameId", "playerO", "playerX", "status" ],
+        "type" : "object",
+        "properties" : {
+          "gameId" : {
+            "type" : "integer",
+            "example" : 12
+          },
+          "playerX" : {
+            "$ref" : "#/components/schemas/Player"
+          },
+          "playerO" : {
+            "$ref" : "#/components/schemas/Player"
+          },
+          "status" : {
+            "type" : "string",
+            "default" : "notStarted",
+            "enum" : [ "notStarted", "accepted", "rejected", "inProgress", "playerXwon", "playerOwon", "drawn" ]
+          },
+          "moves" : {
+            "type" : "array",
+            "example" : [ ],
+            "items" : {
+              "$ref" : "#/components/schemas/Move"
+            }
+          }
+        },
+        "example" : {
+          "gameId" : 12,
+          "playerX" : {
+            "availability" : true,
+            "playerId" : 123,
+            "username" : "player"
+          },
+          "moves" : [ ],
+          "playerO" : null,
+          "status" : "notStarted"
+        }
+      },
+      "Move" : {
+        "required" : [ "byPlayer", "xCoordinate", "yCoordinate" ],
+        "type" : "object",
+        "properties" : {
+          "byPlayer" : {
+            "type" : "string",
+            "enum" : [ "playerX", "player0" ]
+          },
+          "xCoordinate" : {
+            "maximum" : 3,
+            "minimum" : 1,
+            "type" : "integer",
+            "example" : 1
+          },
+          "yCoordinate" : {
+            "maximum" : 3,
+            "minimum" : 1,
+            "type" : "integer",
+            "example" : 2
+          }
+        },
+        "example" : {
+          "byPlayer" : "playerX",
+          "xCoordinate" : 1,
+          "yCoordinate" : 2
+        }
+      },
+      "Error" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "example" : "Error"
+      },
+      "PlayerBody" : {
+        "required" : [ "username" ],
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string",
+            "example" : "player"
+          }
+        }
+      },
+      "GameBody" : {
+        "required" : [ "toPlayerId" ],
+        "type" : "object",
+        "properties" : {
+          "toPlayerId" : {
+            "type" : "integer",
+            "example" : 123
+          }
+        }
+      },
+      "MoveBody" : {
+        "required" : [ "xCoordinate", "yCoordinate" ],
+        "type" : "object",
+        "properties" : {
+          "xCoordinate" : {
+            "maximum" : 3,
+            "minimum" : 1,
+            "type" : "integer",
+            "example" : 1
+          },
+          "yCoordinate" : {
+            "maximum" : 3,
+            "minimum" : 1,
+            "type" : "integer",
+            "example" : 2
+          }
+        }
+      }
+    }
+  }
+}
